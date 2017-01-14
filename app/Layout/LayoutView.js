@@ -30,7 +30,6 @@ var LayoutView = Backbone.View.extend({
     },
 
     newTaskButtonHandler: function() {
-        debugger;
         var $inputEl = this.$el.find('#new-task-input');
         var newTaskName = $inputEl.val();
         $inputEl.val('');

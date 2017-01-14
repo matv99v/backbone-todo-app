@@ -1,0 +1,22 @@
+footer {
+    display: flex;
+    text-align: center;
+    background-color: #85C1E9;
+    padding: 5px;
+    margin: 2px;
+
+    & > *:not(:first-of-type) {
+        flex: 1 1 auto;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    & > *:first-child {
+        flex: 8 8 auto;
+    }
+}
+
+.filter-selected {
+    background-color: red;
+}
