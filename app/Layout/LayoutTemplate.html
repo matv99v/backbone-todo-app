@@ -1,0 +1,26 @@
+<header>
+    <input  id='new-task-input' type='text' placeholder='New task' >
+    <button id='new-task-button' >Create task</button>
+</header>
+
+<section class='tasks-container'></section>
+
+<footer>
+
+    <div>
+        <%= itemsLeft %>
+    </div>
+
+    <div class='filter-all' data-filter-state=0>
+        All
+    </div>
+
+    <div class='filter-active' data-filter-state=1>
+        Active
+    </div>
+
+    <div class='filter-completed' data-filter-state=2>
+        Completed
+    </div>
+
+</footer>

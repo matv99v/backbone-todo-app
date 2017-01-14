@@ -1,0 +1,38 @@
+header {
+    text-align: center;
+    display: flex;
+    background-color: #85C1E9;
+    padding: 5px;
+    margin: 2px;
+
+    #new-task-input {
+        flex: 5 5 auto;
+    }
+
+    #new-task-button {
+        flex: 1 1 auto;
+    }
+}
+
+footer {
+    display: flex;
+    text-align: center;
+    background-color: #85C1E9;
+    padding: 5px;
+    margin: 2px;
+
+    & > *:not(:first-of-type) {
+        flex: 1 1 auto;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    & > *:first-child {
+        flex: 8 8 auto;
+    }
+}
+
+.filter-selected {
+    background-color: red;
+}

@@ -1,0 +1,14 @@
+.task-title {
+    background-color: #D5F5E3;
+    padding: 5px;
+    margin: 2px;
+}
+
+.task-title:hover {
+    cursor: pointer;
+}
+
+.task-done {
+    text-decoration: line-through;
+    color: grey;
+}
