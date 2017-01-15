@@ -1,11 +1,24 @@
-.task-title {
+.single-task {
     background-color: #D5F5E3;
     padding: 5px;
     margin: 2px;
-}
+    display: flex;
 
-.task-title:hover {
-    cursor: pointer;
+    & .task-title {
+        flex: 1 1 auto;
+    }
+
+    & .remove-task {
+        color: transparent;;
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+
+    &:hover .remove-task {
+        color: grey;
+    }
 }
 
 .task-done {

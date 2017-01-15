@@ -1,6 +1,8 @@
-let FooterModel = Backbone.Model.extend({
+var tasksView = require('../instances/tasksView');
+
+const FooterModel = Backbone.Model.extend({
     defaults: {
-        itemsLeft: 0,
+        items: tasksView.collection.length,
         filterState: 0
     }
 });

@@ -1,17 +1,10 @@
-const HeaderView  = require('./Header/HeaderView');
-const headerView = new HeaderView();
+Backbone.pubSub = _.extend({}, Backbone.Events);
+
+const headerView = require('./instances/headerView');
 headerView.render();
 
-const TasksView  = require('./Tasks/TasksView');
-const tasksView = new TasksView();
+const tasksView = require('./instances/tasksView');
 tasksView.render();
 
-const FooterView  = require('./Footer/FooterView');
-const footerView = new FooterView();
+const footerView = require('./instances/footerView');
 footerView.render();
-
-//
-// const LayoutView  = require('./Layout/LayoutView');
-//
-// const layoutView = new LayoutView();
-// layoutView.render();

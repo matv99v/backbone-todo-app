@@ -3,7 +3,11 @@ const HeaderTemplate = require('./HeaderTemplate.html');
 require('./HeaderStyles.scss');
 
 var HeaderView = Backbone.View.extend({
-    el: '#app',
+    el: '#app header',
+
+    events: {
+        'click #new-task-button': 'createTaskHandler'
+    },
 
     model: new HeaderModel(),
 
@@ -12,7 +16,14 @@ var HeaderView = Backbone.View.extend({
     render: function() {
        this.$el.append( this.template(this.model.attributes) );
        return this;
-   },
+    },
+
+    createTaskHandler: function() {
+        var $input = this.$el.find('#new-task-input');
+        var newTaskName = $input.val();
+        $input.val('');
+        Backbone.pubSub.trigger('newTaskCreated', newTaskName);
+    }
 });
 
 
