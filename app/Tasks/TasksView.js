@@ -10,7 +10,7 @@ module.exports = Backbone.View.extend({
     initialize: function() {
         var self = this;
         this.listenTo(this.collection, 'add', function(model) {
-            // if filterState === 2 (show completed tasks) we don't want to render item, because new item uncompleted by default
+            // if filterState === 2 (i.e. show completed tasks) we don't want to render item, because new item uncompleted by default
             if (self.curFilterState !== 2) self.renderOne(model);
         });
         eventBus.on(eventBus.taskCreated, this.filterStateChanged, this);
@@ -49,20 +49,18 @@ module.exports = Backbone.View.extend({
     },
 
     filterStateChanged: function(filterState) {
+        this.curFilterState = filterState;
         switch (filterState) {
             case 0:
-                this.curFilterState = filterState;
                 this.render();
                 break;
 
             case 1:
-                this.curFilterState = filterState;
                 var activeTasks = this.collection.where({completed: false});
                 this.render(activeTasks);
                 break;
 
             case 2:
-                this.curFilterState = filterState;
                 var completedTasks = this.collection.where({completed: true});
                 this.render(completedTasks);
                 break;
