@@ -1,4 +1,6 @@
 const TaskModel = require('./TaskModel');
+const eventBus  = require('../Specials/eventBus');
+
 require('./Task.scss');
 
 var TaskView = Backbone.View.extend({
@@ -8,11 +10,20 @@ var TaskView = Backbone.View.extend({
         return {'data-cid': this.model.cid};
     },
 
+    events: {
+         'click .remove-task' : 'taskRemoveHandler',
+    },
+
     template: _.template( require('./TaskTemplate.html') ),
 
     initialize: function() {
         var self = this;
         this.listenTo(this.model, 'change:completed', this.render);
+    },
+
+    taskRemoveHandler: function() {
+        eventBus.trigger(eventBus.taskRemoved, this.model);
+        this.remove();
     },
 
     render: function() {

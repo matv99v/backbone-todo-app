@@ -1,5 +1,3 @@
-Backbone.pubSub = _.extend({}, Backbone.Events);
-
 const headerView = require('./instances/headerView');
 headerView.render();
 

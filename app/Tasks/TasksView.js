@@ -1,18 +1,24 @@
 const TasksCollection = require('./TasksCollection');
-const TaskView = require('./TaskView');
+const TaskView        = require('./TaskView');
+const eventBus        = require('../Specials/eventBus');
+// const footerModel     = require('../instances/footerView');
 
 
 module.exports = Backbone.View.extend({
     el: '#app section',
 
     initialize: function() {
-        this.listenTo(this.collection, 'add', this.renderOne);
-        Backbone.pubSub.on('filterStateChanged', this.filterStateChanged, this);
+        var self = this;
+        this.listenTo(this.collection, 'add', function(model) {
+            // if filterState === 2 (show completed tasks) we don't want to render item, because new item uncompleted by default
+            if (self.curFilterState !== 2) self.renderOne(model);
+        });
+        eventBus.on(eventBus.taskCreated, this.filterStateChanged, this);
+        eventBus.on(eventBus.filterStateChanged, this.filterStateChanged, this);
     },
 
     events: {
-         'click .task-title' : 'taskCompletionHandler',
-         'click .remove-task' : 'taskRemoveHandler',
+         'click .task-title'  : 'taskCompletionHandler',
     },
 
     collection: new TasksCollection([
@@ -37,32 +43,32 @@ module.exports = Backbone.View.extend({
     },
 
     taskCompletionHandler: function(e) {
+        var el = $(e.target).closest("[data-cid]").attr('data-cid');
         var clickedTask = this.collection.findWhere({title: e.target.innerText});
         clickedTask.switch();
-    },
-
-    taskRemoveHandler: function(e) {
-        var cid = $(e.target).closest("[data-cid]").attr('data-cid');
-        this.collection.remove(cid);
-        this.render();
     },
 
     filterStateChanged: function(filterState) {
         switch (filterState) {
             case 0:
+                this.curFilterState = filterState;
                 this.render();
-            break;
+                break;
 
             case 1:
+                this.curFilterState = filterState;
                 var activeTasks = this.collection.where({completed: false});
                 this.render(activeTasks);
                 break;
 
             case 2:
+                this.curFilterState = filterState;
                 var completedTasks = this.collection.where({completed: true});
                 this.render(completedTasks);
                 break;
         }
-    }
+    },
+
+    curFilterState: 0
 
 });

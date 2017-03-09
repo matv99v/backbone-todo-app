@@ -1,5 +1,7 @@
 const HeaderModel    = require('./HeaderModel.js');
 const HeaderTemplate = require('./HeaderTemplate.html');
+const eventBus       = require('../Specials/eventBus');
+
 require('./HeaderStyles.scss');
 
 var HeaderView = Backbone.View.extend({
@@ -22,7 +24,7 @@ var HeaderView = Backbone.View.extend({
         var $input = this.$el.find('#new-task-input');
         var newTaskName = $input.val();
         $input.val('');
-        Backbone.pubSub.trigger('newTaskCreated', newTaskName);
+        eventBus.trigger(eventBus.taskCreated, newTaskName);
     }
 });
 
