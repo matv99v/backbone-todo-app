@@ -1,3 +1,6 @@
+require('./app.scss');
+
+
 const headerView = require('./instances/headerView');
 headerView.render();
 

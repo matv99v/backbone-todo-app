@@ -22,9 +22,9 @@ module.exports = Backbone.View.extend({
     },
 
     collection: new TasksCollection([
-         {title: 'Learn Backbone'},
-         {title: 'Pass backbone course on DataartEdu'},
-         {title: 'Upload course code to GitHub'},
+        //  {title: 'Learn Backbone'},
+        //  {title: 'Pass backbone course on DataartEdu'},
+        //  {title: 'Upload course code to GitHub'},
         //  {title: 'Ask Eugene to comment the code'},
         //  {title: 'Go to Mamamia restourant'},
         //  {title: 'Send a presents via Nova Poshta'},
