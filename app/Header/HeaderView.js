@@ -1,4 +1,3 @@
-const HeaderModel    = require('./HeaderModel.js');
 const HeaderTemplate = require('./HeaderTemplate.html');
 const eventBus       = require('../Specials/eventBus');
 
@@ -13,12 +12,10 @@ var HeaderView = Backbone.View.extend({
 
     },
 
-    model: new HeaderModel(),
-
     template: _.template(HeaderTemplate),
 
     render: function() {
-       this.$el.append( this.template(this.model.attributes) );
+       this.$el.append( this.template() );
        return this;
     },
 
