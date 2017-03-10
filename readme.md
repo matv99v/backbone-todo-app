@@ -1,1 +1,2 @@
-https://matv99v.github.io/backbone-todo-app/
+My todo app entirely build with backbone and bundled with webpack.
+Avaliable at https://matv99v.github.io/backbone-todo-app/
