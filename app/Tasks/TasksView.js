@@ -1,7 +1,7 @@
 const TasksCollection = require('./TasksCollection');
 const TaskView        = require('./TaskView');
 const eventBus        = require('../Specials/eventBus');
-// const footerModel     = require('../instances/footerView');
+// const filterTasksHelper = require('../Specials/filterTasksHelper');
 
 
 module.exports = Backbone.View.extend({
@@ -9,26 +9,24 @@ module.exports = Backbone.View.extend({
 
     initialize: function() {
         var self = this;
-        this.listenTo(this.collection, 'add', function(model) {
-            // if filterState === 2 (i.e. show completed tasks) we don't want to render item, because new item uncompleted by default
-            if (self.curFilterState !== 2) self.renderOne(model);
+        this.listenTo(this.collection, 'add remove', function() {
+            self.filterStateChangedHandler(self.curFilterState);
         });
-        eventBus.on(eventBus.taskCreated, this.filterStateChanged, this);
-        eventBus.on(eventBus.filterStateChanged, this.filterStateChanged, this);
+        eventBus.on(eventBus.filterStateChanged, this.filterStateChangedHandler, this);
     },
 
     events: {
-         'click .task-title'  : 'taskCompletionHandler',
+        'click .task-title': 'taskCompletionHandler'
     },
 
     collection: new TasksCollection([
-        //  {title: 'Learn Backbone'},
-        //  {title: 'Pass backbone course on DataartEdu'},
-        //  {title: 'Upload course code to GitHub'},
-        //  {title: 'Ask Eugene to comment the code'},
-        //  {title: 'Go to Mamamia restourant'},
-        //  {title: 'Send a presents via Nova Poshta'},
-        //  {title: 'Walk the dog'}
+         {title: 'Learn Backbone'},
+         {title: 'Pass backbone course on DataartEdu', completed: true},
+         {title: 'Upload course code to GitHub'},
+         {title: 'Ask Eugene to comment the code'},
+         {title: 'Go to Mamamia restourant', completed: true},
+         {title: 'Send a presents via Nova Poshta'},
+         {title: 'Walk the dog'}
     ]),
 
     render: function(passedTasks) {
@@ -46,9 +44,10 @@ module.exports = Backbone.View.extend({
         var el = $(e.target).closest("[data-cid]").attr('data-cid');
         var clickedTask = this.collection.findWhere({title: e.target.innerText});
         clickedTask.switch();
+        this.filterStateChangedHandler(this.curFilterState);
     },
 
-    filterStateChanged: function(filterState) {
+    filterStateChangedHandler: function(filterState) {
         this.curFilterState = filterState;
         switch (filterState) {
             case 0:

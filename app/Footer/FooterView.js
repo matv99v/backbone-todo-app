@@ -12,8 +12,10 @@ var FooterView = Backbone.View.extend({
     initialize: function() {
         eventBus.on(eventBus.taskCreated, this.updateQuantity, this);
         eventBus.on(eventBus.taskRemoved, this.updateQuantity, this);
+        eventBus.on(eventBus.taskCompletionChanged, this.updateQuantity, this);
 
-        this.model.set('items', tasksView.collection.where({completed: false}).length);
+        this.model.on('change', this.render, this);
+        this.updateQuantity();
     },
 
     model: new FooterModel(),
@@ -40,8 +42,7 @@ var FooterView = Backbone.View.extend({
             items      : this.setQuantity(filterState)
         });
 
-        this.render();
-        eventBus.trigger(eventBus.filterStateChanged, +filterState);
+        eventBus.trigger(eventBus.filterStateChanged, +filterState); // rising event for updating TasksView
     },
 
     updateQuantity: function() {
@@ -50,7 +51,6 @@ var FooterView = Backbone.View.extend({
         this.model.set({
             'items': this.setQuantity(filterState)
         });
-        this.render();
     },
 
     setQuantity(filterState) {
@@ -63,6 +63,7 @@ var FooterView = Backbone.View.extend({
                 return tasksView.collection.where({completed: true}).length;
         }
     }
+
 });
 
 

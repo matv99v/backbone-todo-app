@@ -1,5 +1,5 @@
 const TaskModel  = require('./TaskModel');
-const HeaderView = require('../Header/HeaderView');
+// const HeaderView = require('../Header/HeaderView');
 const eventBus   = require('../Specials/eventBus');
 
 
@@ -14,6 +14,7 @@ module.exports = Backbone.Collection.extend({
     taskAddHandler: function(taskName) {
         var model = new TaskModel({title: taskName});
         if (model.isValid()) {
+            console.log('new task created');
             this.push({title: taskName});
         } else {
             console.debug('Invalid task name')

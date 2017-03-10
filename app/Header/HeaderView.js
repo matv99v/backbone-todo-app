@@ -8,7 +8,9 @@ var HeaderView = Backbone.View.extend({
     el: '#app header',
 
     events: {
-        'click #new-task-button': 'createTaskHandler'
+        'click #new-task-button': 'createTaskHandler',
+        'keydown'               : 'keyAction'
+
     },
 
     model: new HeaderModel(),
@@ -25,7 +27,15 @@ var HeaderView = Backbone.View.extend({
         var newTaskName = $input.val();
         $input.val('');
         eventBus.trigger(eventBus.taskCreated, newTaskName);
+    },
+
+    keyAction: function(e) {
+        var code = e.keyCode || e.which;
+        if (code === 13) {
+            this.createTaskHandler();
+        }
     }
+
 });
 
 

@@ -22,8 +22,8 @@ var TaskView = Backbone.View.extend({
     },
 
     taskRemoveHandler: function() {
-        eventBus.trigger(eventBus.taskRemoved, this.model);
         this.remove();
+        eventBus.trigger(eventBus.taskRemoved, this.model);
     },
 
     render: function() {
