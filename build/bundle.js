@@ -44,35 +44,425 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const AppView = __webpack_require__(1);
+	__webpack_require__(1);
 	
-	var appView = new AppView();
-	appView.render();
+	
+	const headerView = __webpack_require__(5);
+	headerView.render();
+	
+	const tasksView = __webpack_require__(14);
+	tasksView.render();
+	
+	const footerView = __webpack_require__(22);
+	footerView.render();
 
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Backbone) {const TasksCollection = __webpack_require__(5);
+	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
-	// console.log( new TasksCollection([
-	//     {title: 'one'},
-	//     {title: 'two'},
-	//     {title: 'three'}
-	// ]) );
-	
-	module.exports = Backbone.View.extend({
-	     el: '#app',
-	     initialize: function() {
-	         console.log('initialize');
-	     }
-	});
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+	// load the styles
+	var content = __webpack_require__(2);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(4)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../node_modules/css-loader/index.js!./../node_modules/sass-loader/index.js!./app.scss", function() {
+				var newContent = require("!!./../node_modules/css-loader/index.js!./../node_modules/sass-loader/index.js!./app.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
 
 /***/ },
 /* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(3)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, "body {\n  display: flex;\n  justify-content: space-around; }\n\nhtml * {\n  font-size: 25px;\n  font-family: monospace; }\n\n#app {\n  min-width: 650px; }\n", ""]);
+	
+	// exports
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
+	
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
+	
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	var stylesInDom = {},
+		memoize = function(fn) {
+			var memo;
+			return function () {
+				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+				return memo;
+			};
+		},
+		isOldIE = memoize(function() {
+			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+		}),
+		getHeadElement = memoize(function () {
+			return document.head || document.getElementsByTagName("head")[0];
+		}),
+		singletonElement = null,
+		singletonCounter = 0,
+		styleElementsInsertedAtTop = [];
+	
+	module.exports = function(list, options) {
+		if(true) {
+			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+		}
+	
+		options = options || {};
+		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+		// tags it will allow on a page
+		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+	
+		// By default, add <style> tags to the bottom of <head>.
+		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
+	
+		var styles = listToStyles(list);
+		addStylesToDom(styles, options);
+	
+		return function update(newList) {
+			var mayRemove = [];
+			for(var i = 0; i < styles.length; i++) {
+				var item = styles[i];
+				var domStyle = stylesInDom[item.id];
+				domStyle.refs--;
+				mayRemove.push(domStyle);
+			}
+			if(newList) {
+				var newStyles = listToStyles(newList);
+				addStylesToDom(newStyles, options);
+			}
+			for(var i = 0; i < mayRemove.length; i++) {
+				var domStyle = mayRemove[i];
+				if(domStyle.refs === 0) {
+					for(var j = 0; j < domStyle.parts.length; j++)
+						domStyle.parts[j]();
+					delete stylesInDom[domStyle.id];
+				}
+			}
+		};
+	}
+	
+	function addStylesToDom(styles, options) {
+		for(var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+			if(domStyle) {
+				domStyle.refs++;
+				for(var j = 0; j < domStyle.parts.length; j++) {
+					domStyle.parts[j](item.parts[j]);
+				}
+				for(; j < item.parts.length; j++) {
+					domStyle.parts.push(addStyle(item.parts[j], options));
+				}
+			} else {
+				var parts = [];
+				for(var j = 0; j < item.parts.length; j++) {
+					parts.push(addStyle(item.parts[j], options));
+				}
+				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+			}
+		}
+	}
+	
+	function listToStyles(list) {
+		var styles = [];
+		var newStyles = {};
+		for(var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var id = item[0];
+			var css = item[1];
+			var media = item[2];
+			var sourceMap = item[3];
+			var part = {css: css, media: media, sourceMap: sourceMap};
+			if(!newStyles[id])
+				styles.push(newStyles[id] = {id: id, parts: [part]});
+			else
+				newStyles[id].parts.push(part);
+		}
+		return styles;
+	}
+	
+	function insertStyleElement(options, styleElement) {
+		var head = getHeadElement();
+		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
+		if (options.insertAt === "top") {
+			if(!lastStyleElementInsertedAtTop) {
+				head.insertBefore(styleElement, head.firstChild);
+			} else if(lastStyleElementInsertedAtTop.nextSibling) {
+				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
+			} else {
+				head.appendChild(styleElement);
+			}
+			styleElementsInsertedAtTop.push(styleElement);
+		} else if (options.insertAt === "bottom") {
+			head.appendChild(styleElement);
+		} else {
+			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+		}
+	}
+	
+	function removeStyleElement(styleElement) {
+		styleElement.parentNode.removeChild(styleElement);
+		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
+		if(idx >= 0) {
+			styleElementsInsertedAtTop.splice(idx, 1);
+		}
+	}
+	
+	function createStyleElement(options) {
+		var styleElement = document.createElement("style");
+		styleElement.type = "text/css";
+		insertStyleElement(options, styleElement);
+		return styleElement;
+	}
+	
+	function createLinkElement(options) {
+		var linkElement = document.createElement("link");
+		linkElement.rel = "stylesheet";
+		insertStyleElement(options, linkElement);
+		return linkElement;
+	}
+	
+	function addStyle(obj, options) {
+		var styleElement, update, remove;
+	
+		if (options.singleton) {
+			var styleIndex = singletonCounter++;
+			styleElement = singletonElement || (singletonElement = createStyleElement(options));
+			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
+			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
+		} else if(obj.sourceMap &&
+			typeof URL === "function" &&
+			typeof URL.createObjectURL === "function" &&
+			typeof URL.revokeObjectURL === "function" &&
+			typeof Blob === "function" &&
+			typeof btoa === "function") {
+			styleElement = createLinkElement(options);
+			update = updateLink.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+				if(styleElement.href)
+					URL.revokeObjectURL(styleElement.href);
+			};
+		} else {
+			styleElement = createStyleElement(options);
+			update = applyToTag.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+			};
+		}
+	
+		update(obj);
+	
+		return function updateStyle(newObj) {
+			if(newObj) {
+				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
+					return;
+				update(obj = newObj);
+			} else {
+				remove();
+			}
+		};
+	}
+	
+	var replaceText = (function () {
+		var textStore = [];
+	
+		return function (index, replacement) {
+			textStore[index] = replacement;
+			return textStore.filter(Boolean).join('\n');
+		};
+	})();
+	
+	function applyToSingletonTag(styleElement, index, remove, obj) {
+		var css = remove ? "" : obj.css;
+	
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = replaceText(index, css);
+		} else {
+			var cssNode = document.createTextNode(css);
+			var childNodes = styleElement.childNodes;
+			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
+			if (childNodes.length) {
+				styleElement.insertBefore(cssNode, childNodes[index]);
+			} else {
+				styleElement.appendChild(cssNode);
+			}
+		}
+	}
+	
+	function applyToTag(styleElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+	
+		if(media) {
+			styleElement.setAttribute("media", media)
+		}
+	
+		if(styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = css;
+		} else {
+			while(styleElement.firstChild) {
+				styleElement.removeChild(styleElement.firstChild);
+			}
+			styleElement.appendChild(document.createTextNode(css));
+		}
+	}
+	
+	function updateLink(linkElement, obj) {
+		var css = obj.css;
+		var sourceMap = obj.sourceMap;
+	
+		if(sourceMap) {
+			// http://stackoverflow.com/a/26603875
+			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+		}
+	
+		var blob = new Blob([css], { type: "text/css" });
+	
+		var oldSrc = linkElement.href;
+	
+		linkElement.href = URL.createObjectURL(blob);
+	
+		if(oldSrc)
+			URL.revokeObjectURL(oldSrc);
+	}
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const HeaderView  = __webpack_require__(6);
+	const headerView = new HeaderView();
+	
+	module.exports = headerView;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Backbone, _) {const HeaderTemplate = __webpack_require__(10);
+	const eventBus       = __webpack_require__(11);
+	
+	__webpack_require__(12);
+	
+	var HeaderView = Backbone.View.extend({
+	    el: '#app header',
+	
+	    events: {
+	        'click #new-task-button': 'createTaskHandler',
+	        'keydown'               : 'keyAction'
+	
+	    },
+	
+	    template: _.template(HeaderTemplate),
+	
+	    render: function() {
+	       this.$el.append( this.template() );
+	       return this;
+	    },
+	
+	    createTaskHandler: function() {
+	        var $input = this.$el.find('#new-task-input');
+	        var newTaskName = $input.val();
+	        $input.val('');
+	        eventBus.trigger(eventBus.taskCreated, newTaskName);
+	    },
+	
+	    keyAction: function(e) {
+	        var code = e.keyCode || e.which;
+	        if (code === 13) {
+	            this.createTaskHandler();
+	        }
+	    }
+	
+	});
+	
+	
+	module.exports = HeaderView;
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7), __webpack_require__(8)))
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.3.3
@@ -91,7 +481,7 @@
 	
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3), __webpack_require__(4), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(8), __webpack_require__(9), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -1999,7 +2389,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 3 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -3553,7 +3943,7 @@
 
 
 /***/ },
-/* 4 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -13779,40 +14169,466 @@
 
 
 /***/ },
-/* 5 */
+/* 10 */
+/***/ function(module, exports) {
+
+	module.exports = "<input  id='new-task-input' type='text' placeholder='New task' >\n<button id='new-task-button' >Create task</button>\n";
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Backbone) {const TaskModel = __webpack_require__(6);
+	/* WEBPACK VAR INJECTION */(function(_, Backbone) {var eventBus = {
+	    filterStateChanged   : 'filterStateChanged',
+	    taskCreated          : 'taskCreated',
+	    taskRemoved          : 'taskRemoved',
+	    taskCompletionChanged: 'taskCompletionChanged'
+	};
+	
+	module.exports = _.extend(eventBus, Backbone.Events);
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8), __webpack_require__(7)))
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(13);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(4)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./HeaderStyles.scss", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./HeaderStyles.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(3)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, "header {\n  text-align: center;\n  display: flex;\n  background-color: #85C1E9;\n  padding: 5px;\n  margin: 2px; }\n  header #new-task-input {\n    flex: 5 5 auto; }\n  header #new-task-button {\n    flex: 1 1 auto; }\n", ""]);
+	
+	// exports
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const TasksView  = __webpack_require__(15);
+	const tasksView = new TasksView();
+	
+	module.exports = tasksView;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Backbone, $) {const TasksCollection = __webpack_require__(16);
+	const TaskView        = __webpack_require__(18);
+	const eventBus        = __webpack_require__(11);
+	// const filterTasksHelper = require('../Specials/filterTasksHelper');
+	
+	
+	module.exports = Backbone.View.extend({
+	    el: '#app section',
+	
+	    initialize: function() {
+	        var self = this;
+	        this.listenTo(this.collection, 'add remove', function() {
+	            self.filterStateChangedHandler(self.curFilterState);
+	        });
+	        eventBus.on(eventBus.filterStateChanged, this.filterStateChangedHandler, this);
+	    },
+	
+	    events: {
+	        'click .task-title': 'taskCompletionHandler'
+	    },
+	
+	    collection: new TasksCollection([
+	         {title: 'Learn Backbone'},
+	         {title: 'Pass backbone course on DataartEdu', completed: true},
+	         {title: 'Upload course code to GitHub'},
+	         {title: 'Ask Eugene to comment the code'},
+	         {title: 'Go to Mamamia restourant', completed: true},
+	         {title: 'Send a presents via Nova Poshta'},
+	         {title: 'Walk the dog'}
+	    ]),
+	
+	    render: function(passedTasks) {
+	        var tasks = passedTasks ? passedTasks : this.collection;
+	        this.$el.html('');
+	        tasks.forEach( task => this.renderOne(task) );
+	    },
+	
+	    renderOne: function(model) {
+	        var taskView = new TaskView({model: model});
+	        this.$el.append( taskView.render().$el );
+	    },
+	
+	    taskCompletionHandler: function(e) {
+	        var el = $(e.target).closest("[data-cid]").attr('data-cid');
+	        var clickedTask = this.collection.findWhere({title: e.target.innerText});
+	        clickedTask.switch();
+	        this.filterStateChangedHandler(this.curFilterState);
+	    },
+	
+	    filterStateChangedHandler: function(filterState) {
+	        this.curFilterState = filterState;
+	        switch (filterState) {
+	            case 0:
+	                this.render();
+	                break;
+	
+	            case 1:
+	                var activeTasks = this.collection.where({completed: false});
+	                this.render(activeTasks);
+	                break;
+	
+	            case 2:
+	                var completedTasks = this.collection.where({completed: true});
+	                this.render(completedTasks);
+	                break;
+	        }
+	    },
+	
+	    curFilterState: 0
+	
+	});
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7), __webpack_require__(9)))
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Backbone) {const TaskModel  = __webpack_require__(17);
+	// const HeaderView = require('../Header/HeaderView');
+	const eventBus   = __webpack_require__(11);
 	
 	
 	module.exports = Backbone.Collection.extend({
-	    model: TaskModel
-	});
+	    model: TaskModel,
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(Backbone) {module.exports = Backbone.Model.extend({
-	
-	  // Default attributes ensure that each todo created has `title` and `completed` keys.
-	    defaults: {
-	        title: '',
-	        completed: false
+	    initialize: function() {
+	        eventBus.on(eventBus.taskCreated, this.taskAddHandler,    this);
+	        eventBus.on(eventBus.taskRemoved, this.taskRemoveHandler, this);
 	    },
 	
-	  // Toggle the `completed` state of this todo item.
-	    toggle: function() {
-	        this.save({
-	            completed: !this.get('completed')
-	        });
+	    taskAddHandler: function(taskName) {
+	        var model = new TaskModel({title: taskName});
+	        if (model.isValid()) {
+	            console.log('new task created');
+	            this.push({title: taskName});
+	        } else {
+	            console.debug('Invalid task name')
+	        }
+	    },
+	
+	    taskRemoveHandler: function(taskModel) {
+	        this.remove(taskModel);
 	    }
 	
 	});
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Backbone) {const eventBus = __webpack_require__(11);
+	
+	
+	module.exports = Backbone.Model.extend({
+	    defaults: {
+	        title    : '',
+	        completed: false
+	    },
+	
+	    initialize: function() {
+	        this.on("invalid", function(model, error) {
+	            alert(model.get("title") + " " + error);
+	        });
+	    },
+	
+	    switch: function() {
+	        this.set('completed', !this.get('completed'));
+	        eventBus.trigger(eventBus.taskCompletionChanged);
+	    },
+	
+	    validate: function(attrs, options) {
+	        if (!attrs.title.length) {
+	           return "Task should have name!";
+	        }
+	    }
+	
+	});
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Backbone, _) {const TaskModel = __webpack_require__(17);
+	const eventBus  = __webpack_require__(11);
+	
+	__webpack_require__(19);
+	
+	var TaskView = Backbone.View.extend({
+	    className: 'single-task',
+	
+	    attributes: function() {
+	        return {'data-cid': this.model.cid};
+	    },
+	
+	    events: {
+	         'click .remove-task' : 'taskRemoveHandler',
+	    },
+	
+	    template: _.template( __webpack_require__(21) ),
+	
+	    initialize: function() {
+	        var self = this;
+	        this.listenTo(this.model, 'change:completed', this.render);
+	    },
+	
+	    taskRemoveHandler: function() {
+	        this.remove();
+	        eventBus.trigger(eventBus.taskRemoved, this.model);
+	    },
+	
+	    render: function() {
+	        this.$el
+	            .html(this.template(this.model.attributes))
+	            .find('.task-title')
+	            .addClass(this.model.get('completed') ? 'task-done' : '');
+	        return this;
+	    }
+	
+	});
+	
+	
+	module.exports = TaskView;
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7), __webpack_require__(8)))
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(20);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(4)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./Task.scss", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./Task.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(3)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, ".single-task {\n  background-color: #D5F5E3;\n  padding: 5px;\n  margin: 2px;\n  display: flex; }\n  .single-task .task-title {\n    flex: 1 1 auto; }\n  .single-task .remove-task {\n    color: transparent; }\n  .single-task:hover {\n    cursor: pointer; }\n  .single-task:hover .remove-task {\n    color: grey; }\n\n.task-done {\n  text-decoration: line-through;\n  color: grey; }\n", ""]);
+	
+	// exports
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	module.exports = "<span class=\"task-title\"><%= title %></span>\n<span class='remove-task'>[x]</span>\n";
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const FooterView  = __webpack_require__(23);
+	const footerView = new FooterView();
+	
+	
+	module.exports = footerView;
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Backbone, _) {const FooterModel    = __webpack_require__(24);
+	const FooterTemplate = __webpack_require__(25);
+	const tasksView      = __webpack_require__(14);
+	const eventBus       = __webpack_require__(11);
+	
+	__webpack_require__(26);
+	
+	
+	var FooterView = Backbone.View.extend({
+	    el: '#app footer',
+	
+	    initialize: function() {
+	        eventBus.on(eventBus.taskCreated, this.updateQuantity, this);
+	        eventBus.on(eventBus.taskRemoved, this.updateQuantity, this);
+	        eventBus.on(eventBus.taskCompletionChanged, this.updateQuantity, this);
+	
+	        this.model.on('change', this.render, this);
+	        this.updateQuantity();
+	    },
+	
+	    model: new FooterModel(),
+	
+	    events: {
+	        'click [class|="filter"]' : 'updateFilterViewState',
+	    },
+	
+	    template: _.template(FooterTemplate),
+	
+	    render: function() {
+	        this.$el
+	            .html(this.template(this.model.attributes))
+	            .find('[data-filter-state|=' + this.model.get('filterState') + ']')
+	            .addClass('filter-selected');
+	       return this;
+	    },
+	
+	    updateFilterViewState: function(e) {
+	        var filterState = +e.target.getAttribute('data-filter-state')
+	
+	        this.model.set({
+	            filterState: filterState,
+	            items      : this.setQuantity(filterState)
+	        });
+	
+	        eventBus.trigger(eventBus.filterStateChanged, +filterState); // rising event for updating TasksView
+	    },
+	
+	    updateQuantity: function() {
+	        var filterState = this.model.get('filterState');
+	
+	        this.model.set({
+	            'items': this.setQuantity(filterState)
+	        });
+	    },
+	
+	    setQuantity(filterState) {
+	        switch (filterState) {
+	            case 0:
+	                return tasksView.collection.length;
+	            case 1:
+	                return tasksView.collection.where({completed: false}).length;
+	            case 2:
+	                return tasksView.collection.where({completed: true}).length;
+	        }
+	    }
+	
+	});
+	
+	
+	module.exports = FooterView;
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7), __webpack_require__(8)))
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Backbone) {const FooterModel = Backbone.Model.extend({
+	    defaults: {
+	        items      : 0,
+	        filterState: 0
+	    }
+	});
+	
+	
+	
+	module.exports = FooterModel;
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	module.exports = "<div><%= items %></div>\n<div class='filter-all'       data-filter-state=0>All</div>\n<div class='filter-active'    data-filter-state=1>Active</div>\n<div class='filter-completed' data-filter-state=2>Completed</div>\n";
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	
+	// load the styles
+	var content = __webpack_require__(27);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(4)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./FooterStyles.scss", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./FooterStyles.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(3)();
+	// imports
+	
+	
+	// module
+	exports.push([module.id, "footer {\n  display: flex;\n  text-align: center;\n  background-color: #85C1E9;\n  padding: 5px;\n  margin: 2px; }\n  footer > *:not(:first-of-type) {\n    flex: 1 1 auto; }\n    footer > *:not(:first-of-type):hover {\n      cursor: pointer; }\n  footer > *:first-child {\n    flex: 8 8 auto; }\n\n.filter-selected {\n  background-color: #fff0b3;\n  border-radius: 7px; }\n", ""]);
+	
+	// exports
+
 
 /***/ }
 /******/ ]);
