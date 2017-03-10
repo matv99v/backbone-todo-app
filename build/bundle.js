@@ -14265,13 +14265,13 @@
 	    },
 	
 	    collection: new TasksCollection([
-	         {title: 'Learn Backbone'},
-	         {title: 'Pass backbone course on DataartEdu', completed: true},
-	         {title: 'Upload course code to GitHub'},
-	         {title: 'Ask Eugene to comment the code'},
-	         {title: 'Go to Mamamia restourant', completed: true},
-	         {title: 'Send a presents via Nova Poshta'},
-	         {title: 'Walk the dog'}
+	        //  {title: 'Learn Backbone'},
+	        //  {title: 'Pass backbone course on DataartEdu', completed: true},
+	        //  {title: 'Upload course code to GitHub'},
+	        //  {title: 'Ask Eugene to comment the code'},
+	        //  {title: 'Go to Mamamia restourant', completed: true},
+	        //  {title: 'Send a presents via Nova Poshta'},
+	        //  {title: 'Walk the dog'}
 	    ]),
 	
 	    render: function(passedTasks) {
@@ -14337,7 +14337,6 @@
 	    taskAddHandler: function(taskName) {
 	        var model = new TaskModel({title: taskName});
 	        if (model.isValid()) {
-	            console.log('new task created');
 	            this.push({title: taskName});
 	        } else {
 	            console.debug('Invalid task name')

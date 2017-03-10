@@ -14,7 +14,6 @@ module.exports = Backbone.Collection.extend({
     taskAddHandler: function(taskName) {
         var model = new TaskModel({title: taskName});
         if (model.isValid()) {
-            console.log('new task created');
             this.push({title: taskName});
         } else {
             console.debug('Invalid task name')
